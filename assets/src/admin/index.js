@@ -1,0 +1,2 @@
+/*CSS*/
+import './admin.scss';
