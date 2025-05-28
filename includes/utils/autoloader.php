@@ -71,6 +71,11 @@ class Autoloader
                 }
                 break;
 
+            case 'api':
+                $directory = 'includes/api';
+                $file_name = !empty($path[1]) ? sprintf('class-%s', trim(strtolower($path[1]))) : '';
+                break;
+
             case 'widgets':
                 $directory = 'includes/widgets';
                 $file_name = !empty($path[1]) ? sprintf('class-%s', trim(strtolower($path[1]))) : '';

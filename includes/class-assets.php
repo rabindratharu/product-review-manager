@@ -49,8 +49,9 @@ class Assets
      */
     public function register_styles()
     {
+        $suffix = is_rtl() ? '-rtl' : '';
         // Register styles.
-        wp_register_style('main', PRM_BUILD_PATH_URL . '/main/index.css', [], filemtime(PRM_BUILD_PATH . '/main/index.css'), 'all');
+        wp_register_style('main', PRM_BUILD_PATH_URL . "/main/index{$suffix}.css", [], filemtime(PRM_BUILD_PATH . "/main/index{$suffix}.css"), 'all');
         // Enqueue Styles.
         wp_enqueue_style('main');
     }

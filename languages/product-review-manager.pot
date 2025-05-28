@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0.0\n"
 "Report-Msgid-Bugs-To: https://example.com/support\n"
-"POT-Creation-Date: 2025-05-28T06:46:18.843Z\n"
+"POT-Creation-Date: 2025-05-28T11:36:59.127Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -24,85 +24,133 @@ msgstr ""
 "X-Textdomain-Support: yes\n"
 "X-Generator: grunt-wp-i18n 1.0.3\n"
 
-#: includes/class-meta-boxes.php:68
+#: includes/api/class-rest-endpoint.php:78
+msgid "Search query"
+msgstr ""
+
+#: includes/api/class-rest-endpoint.php:85
+msgid "Comma-separated category IDs"
+msgstr ""
+
+#: includes/api/class-rest-endpoint.php:92
+msgid "Comma-separated tag IDs"
+msgstr ""
+
+#: includes/api/class-rest-endpoint.php:99
+msgid "Page number"
+msgstr ""
+
+#: includes/api/class-rest-endpoint.php:106
+msgid "Posts per page"
+msgstr ""
+
+#: includes/api/class-rest-endpoint.php:113
+msgid "Rating value or range (e.g., 4.5 or 3.0-5.0)"
+msgstr ""
+
+#: includes/class-meta-boxes.php:72
 msgid "Review Details"
 msgstr ""
 
-#: includes/class-meta-boxes.php:108
+#: includes/class-meta-boxes.php:112
 msgid "Product Name"
 msgstr ""
 
-#: includes/class-meta-boxes.php:114
+#: includes/class-meta-boxes.php:118
 msgid "Select a Product"
 msgstr ""
 
-#: includes/class-meta-boxes.php:124
+#: includes/class-meta-boxes.php:128
 msgid "No products found"
 msgstr ""
 
-#: includes/class-meta-boxes.php:132
+#: includes/class-meta-boxes.php:136
 msgid "Rating (1-5)"
 msgstr ""
 
-#: includes/class-meta-boxes.php:137
+#: includes/class-meta-boxes.php:141
 msgid "Select Rating"
 msgstr ""
 
-#: includes/class-meta-boxes.php:143
+#: includes/class-meta-boxes.php:147
 msgid "%d Star%s"
 msgstr ""
 
-#: includes/class-meta-boxes.php:156
+#: includes/class-meta-boxes.php:160
 msgid "Reviewer's Name"
 msgstr ""
 
-#: includes/class-plugin.php:50
+#: includes/class-plugin.php:59
 msgid "Cloning is forbidden."
 msgstr ""
 
-#: includes/class-plugin.php:60
+#: includes/class-plugin.php:73
 msgid "Unserializing instances of this class is forbidden."
 msgstr ""
 
-#: includes/class-register-post-types.php:124
+#: includes/class-register-post-types.php:128
 msgid "Add"
 msgstr ""
 
-#: includes/class-register-post-types.php:131
+#: includes/class-register-post-types.php:135
 msgid "Not found"
 msgstr ""
 
-#: includes/class-register-post-types.php:132
+#: includes/class-register-post-types.php:136
 msgid "Not found in Trash"
 msgstr ""
 
-#: includes/class-register-post-types.php:133
+#: includes/class-register-post-types.php:137
 msgid "Featured Image"
 msgstr ""
 
-#: includes/class-register-post-types.php:134
+#: includes/class-register-post-types.php:138
 msgid "Set featured image"
 msgstr ""
 
-#: includes/class-register-post-types.php:135
+#: includes/class-register-post-types.php:139
 msgid "Remove featured image"
 msgstr ""
 
-#: includes/class-register-post-types.php:136
+#: includes/class-register-post-types.php:140
 msgid "Use as featured image"
 msgstr ""
 
-#: includes/class-register-post-types.php:168
-#: includes/class-register-post-types.php:170
+#: includes/class-register-post-types.php:172
+#: includes/class-register-post-types.php:174
 msgid "Product Reviews"
 msgstr ""
 
-#: includes/class-register-post-types.php:169
+#: includes/class-register-post-types.php:173
 msgid "Product Review"
 msgstr ""
 
-#: includes/class-register-post-types.php:179
+#: includes/class-register-post-types.php:183
 msgid "Product Reviews Manager"
+msgstr ""
+
+#: includes/class-reviews.php:120
+msgid "No product reviews found."
+msgstr ""
+
+#: includes/class-reviews.php:137
+msgid "Product:"
+msgstr ""
+
+#: includes/class-reviews.php:146
+msgid "Rating:"
+msgstr ""
+
+#: includes/class-reviews.php:151
+msgid "Reviewer:"
+msgstr ""
+
+#: includes/class-reviews.php:168
+msgid "« Previous"
+msgstr ""
+
+#: includes/class-reviews.php:169
+msgid "Next »"
 msgstr ""
 
 #. Description of the plugin/theme

@@ -19,6 +19,7 @@ use Product_Review_Manager\Meta_Boxes;
 use Product_Review_Manager\Reviews;
 use Product_Review_Manager\Utils\Helper;
 use Product_Review_Manager\Utils\Singleton;
+use Product_Review_Manager\Api\Rest_Endpoint;
 
 /**
  * Plugin Main Class
@@ -29,6 +30,11 @@ final class Plugin
 {
 
     use Singleton;
+
+    /**
+     * Plugin version
+     */
+    public const VERSION = '1.0.0';
 
     /**
      * Constructor
@@ -42,23 +48,31 @@ final class Plugin
     }
 
     /**
-     * Cloning is forbidden.
+     * Prevent cloning of the plugin instance
      *
      * @since 1.0.0
      */
     public function __clone()
     {
-        _doing_it_wrong(__FUNCTION__, esc_html__('Cloning is forbidden.', 'product-review-manager'), '1.0.0');
+        _doing_it_wrong(
+            __FUNCTION__,
+            esc_html__('Cloning is forbidden.', 'product-review-manager'),
+            self::VERSION
+        );
     }
 
     /**
-     * Unserializing instances of this class is forbidden.
+     * Prevent unserializing of the plugin instance
      *
      * @since 1.0.0
      */
     public function __wakeup()
     {
-        _doing_it_wrong(__FUNCTION__, esc_html__('Unserializing instances of this class is forbidden.', 'product-review-manager'), '1.0.0');
+        _doing_it_wrong(
+            __FUNCTION__,
+            esc_html__('Unserializing instances of this class is forbidden.', 'product-review-manager'),
+            self::VERSION
+        );
     }
 
     /**
@@ -83,7 +97,7 @@ final class Plugin
         load_plugin_textdomain(
             'product-review-manager',
             false,
-            dirname(PRM_BASENAME) . '/languages'
+            dirname(PRM_BASENAME) . '/languages/',
         );
     }
 
@@ -95,10 +109,18 @@ final class Plugin
      */
     public function setup_classes()
     {
-        Assets::get_instance();
-        Helper::get_instance();
+        // Core functionality classes
         Register_Post_Types::get_instance();
         Meta_Boxes::get_instance();
         Reviews::get_instance();
+
+        // Utility classes
+        Helper::get_instance();
+
+        // Frontend/backend assets
+        Assets::get_instance();
+
+        // REST API
+        Rest_Endpoint::get_instance();
     }
 }
