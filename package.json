@@ -7,17 +7,17 @@
 	"main": "Gruntfile.js",
 	"scripts": {
 		"clean": "rimraf assets/build",
-		"build:admin": "wp-scripts build --webpack-src-dir=assets/src/admin --output-path=assets/build/admin",
+		"build:main": "wp-scripts build --webpack-src-dir=assets/src/main --output-path=assets/build/main",
 		"build:block": "wp-scripts build --webpack-src-dir=assets/src/block --output-path=assets/build/block --webpack-copy-php --blocks-manifest",
-		"build": "npm run clean && npm-run-all --parallel build:admin",
+		"build": "npm run clean && npm-run-all --parallel build:main",
 		"format": "wp-scripts format",
 		"lint:css": "wp-scripts lint-style",
 		"lint:js": "wp-scripts lint-js",
 		"packages-update": "wp-scripts packages-update",
 		"plugin-zip": "wp-scripts plugin-zip",
-		"start:admin": "wp-scripts start --webpack-src-dir=assets/src/admin --output-path=assets/build/admin",
+		"start:main": "wp-scripts start --webpack-src-dir=assets/src/main --output-path=assets/build/main",
 		"start:block": "wp-scripts start --webpack-src-dir=assets/src/block --output-path=assets/build/block --webpack-copy-php --blocks-manifest",
-		"start": "npm run clean && npm-run-all --parallel start:admin"
+		"start": "npm run clean && npm-run-all --parallel start:main"
 	},
 	"devDependencies": {
 		"@wordpress/scripts": "^30.17.0",

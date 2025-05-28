@@ -18,3 +18,26 @@
 if (! defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
+
+/**
+ * Define plugin constants.
+ */
+define('PRM_VERSION', '1.0.0');
+define('PRM_FILE', __FILE__);
+define('PRM_PATH', plugin_dir_path(__FILE__));
+define('PRM_URL', plugin_dir_url(__FILE__));
+define('PRM_BASENAME', plugin_basename(__FILE__));
+define('PRM_PLUGIN_NAME', 'product-review-manager');
+define('PRM_BUILD_PATH', PRM_PATH . 'assets/build');
+define('PRM_BUILD_PATH_URL', PRM_URL . 'assets/build');
+
+/**
+ * Bootstrap the plugin.
+ */
+require_once PRM_PATH . 'includes/utils/autoloader.php';
+
+use Product_Review_Manager\Plugin;
+
+if (class_exists('Product_Review_Manager\Plugin')) {
+    $the_plugin = Plugin::get_instance();
+}

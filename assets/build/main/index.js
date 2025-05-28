@@ -2,10 +2,10 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./assets/src/admin/admin.scss":
-/*!*************************************!*\
-  !*** ./assets/src/admin/admin.scss ***!
-  \*************************************/
+/***/ "./assets/src/main/index.scss":
+/*!************************************!*\
+  !*** ./assets/src/main/index.scss ***!
+  \************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -56,11 +56,11 @@ __webpack_require__.r(__webpack_exports__);
 var __webpack_exports__ = {};
 // This entry needs to be wrapped in an IIFE because it needs to be isolated against other modules in the chunk.
 (() => {
-/*!***********************************!*\
-  !*** ./assets/src/admin/index.js ***!
-  \***********************************/
+/*!**********************************!*\
+  !*** ./assets/src/main/index.js ***!
+  \**********************************/
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _admin_scss__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./admin.scss */ "./assets/src/admin/admin.scss");
+/* harmony import */ var _index_scss__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./index.scss */ "./assets/src/main/index.scss");
 /*CSS*/
 
 })();
