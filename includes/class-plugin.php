@@ -9,9 +9,14 @@
 
 namespace Product_Review_Manager;
 
+if (! defined('ABSPATH')) {
+    exit; // Exit if accessed directly.
+}
+
 use Product_Review_Manager\Assets;
 use Product_Review_Manager\Register_Post_Types;
 use Product_Review_Manager\Meta_Boxes;
+use Product_Review_Manager\Reviews;
 use Product_Review_Manager\Utils\Helper;
 use Product_Review_Manager\Utils\Singleton;
 
@@ -94,5 +99,6 @@ final class Plugin
         Helper::get_instance();
         Register_Post_Types::get_instance();
         Meta_Boxes::get_instance();
+        Reviews::get_instance();
     }
 }

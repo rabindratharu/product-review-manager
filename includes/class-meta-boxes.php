@@ -9,6 +9,10 @@
 
 namespace Product_Review_Manager;
 
+if (! defined('ABSPATH')) {
+    exit; // Exit if accessed directly.
+}
+
 use Product_Review_Manager\Utils\Singleton;
 use Product_Review_Manager\Utils\Helper;
 
@@ -47,7 +51,7 @@ class Meta_Boxes
      * @since 1.0.0
      * @return void
      */
-    protected function setup_hooks(): void
+    protected function setup_hooks()
     {
         add_action('add_meta_boxes', [$this, 'add_custom_meta_box']);
         add_action('save_post', [$this, 'save_post_meta_data']);
@@ -58,7 +62,7 @@ class Meta_Boxes
      *
      * @return void
      */
-    public function add_custom_meta_box(): void
+    public function add_custom_meta_box()
     {
         $screens = ['product_review'];
 
@@ -77,10 +81,10 @@ class Meta_Boxes
     /**
      * Render meta box content.
      *
-     * @param \WP_Post $post Post object.
+     * @param WP_Post $post Post object.
      * @return void
      */
-    public function render_meta_box_content(\WP_Post $post): void
+    public function render_meta_box_content($post)
     {
         // Get current values
         $product_name = get_post_meta($post->ID, self::PRODUCT_NAME_FIELD, true);
@@ -169,7 +173,7 @@ class Meta_Boxes
      * @param int $post_id Post ID.
      * @return void
      */
-    public function save_post_meta_data(int $post_id): void
+    public function save_post_meta_data(int $post_id)
     {
         // Check if this is an autosave
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {

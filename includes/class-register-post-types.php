@@ -9,6 +9,10 @@
 
 namespace Product_Review_Manager;
 
+if (! defined('ABSPATH')) {
+    exit; // Exit if accessed directly.
+}
+
 use Product_Review_Manager\Utils\Singleton;
 
 /**
