@@ -46,15 +46,40 @@ class PrmSidebar extends _wordpress_element__WEBPACK_IMPORTED_MODULE_2__.Compone
       children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_edit_post__WEBPACK_IMPORTED_MODULE_0__.PluginSidebar, {
         name: "prm-sidebar",
         title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Product Review Manager', 'product-review-manager'),
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.PanelBody, {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.PanelBody, {
           title: "Review Details",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.TextControl, {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.SelectControl, {
+            label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Rating', 'product-review-manager'),
+            value: this.props.meta.prm_rating || '',
+            options: [{
+              label: 'Select Rating',
+              value: ''
+            }, {
+              label: '1',
+              value: '1'
+            }, {
+              label: '2',
+              value: '2'
+            }, {
+              label: '3',
+              value: '3'
+            }, {
+              label: '4',
+              value: '4'
+            }, {
+              label: '5',
+              value: '5'
+            }],
+            onChange: value => {
+              this.props.setMetaFieldValue(value, "prm_rating");
+            }
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.TextControl, {
             label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Reviewer\'s Name", "product-review-manager"),
             value: this.props.meta.prm_reviewer_name || "",
             onChange: value => {
               this.props.setMetaFieldValue(value, "prm_reviewer_name");
             }
-          })
+          })]
         })
       })
     });
