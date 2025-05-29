@@ -94,7 +94,12 @@ class Register_Post_Types
                 'exclude_from_search' => $args['exclude_from_search'],
                 'publicly_queryable'  => true,
                 'capability_type'     => $args['capability_type'],
-                'rewrite'             => $args['rewrite'],
+                'rewrite'             => [
+                    'slug'       => 'product-reviews', // Changed to a simpler slug
+                    'with_front' => false,
+                    'pages'      => true,
+                    'feeds'      => true,
+                ],
             ];
 
             $result = register_post_type($post_type, $post_type_args);
@@ -178,11 +183,7 @@ class Register_Post_Types
                 'show_in_nav_menus'   => false,
                 'show_in_menu'        => true,
                 'capability_type'     => 'post',
-                'supports'            => ['title', 'editor'],
-                'rewrite'             => [
-                    'slug'       => apply_filters('product_review_manager_slug', esc_html__('Product Reviews Manager', 'product-review-manager')),
-                    'with_front' => false,
-                ],
+                'supports'            => ['title', 'editor', 'revisions', 'thumbnail'],
             ],
         ];
     }

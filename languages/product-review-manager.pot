@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0.0\n"
 "Report-Msgid-Bugs-To: https://example.com/support\n"
-"POT-Creation-Date: 2025-05-28T11:42:19.491Z\n"
+"POT-Creation-Date: 2025-05-28T14:36:02.388Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -88,45 +88,41 @@ msgstr ""
 msgid "Unserializing instances of this class is forbidden."
 msgstr ""
 
-#: includes/class-register-post-types.php:128
+#: includes/class-register-post-types.php:133
 msgid "Add"
 msgstr ""
 
-#: includes/class-register-post-types.php:135
+#: includes/class-register-post-types.php:140
 msgid "Not found"
 msgstr ""
 
-#: includes/class-register-post-types.php:136
+#: includes/class-register-post-types.php:141
 msgid "Not found in Trash"
 msgstr ""
 
-#: includes/class-register-post-types.php:137
+#: includes/class-register-post-types.php:142
 msgid "Featured Image"
 msgstr ""
 
-#: includes/class-register-post-types.php:138
+#: includes/class-register-post-types.php:143
 msgid "Set featured image"
 msgstr ""
 
-#: includes/class-register-post-types.php:139
+#: includes/class-register-post-types.php:144
 msgid "Remove featured image"
 msgstr ""
 
-#: includes/class-register-post-types.php:140
+#: includes/class-register-post-types.php:145
 msgid "Use as featured image"
 msgstr ""
 
-#: includes/class-register-post-types.php:172
-#: includes/class-register-post-types.php:174
+#: includes/class-register-post-types.php:177
+#: includes/class-register-post-types.php:179
 msgid "Product Reviews"
 msgstr ""
 
-#: includes/class-register-post-types.php:173
+#: includes/class-register-post-types.php:178
 msgid "Product Review"
-msgstr ""
-
-#: includes/class-register-post-types.php:183
-msgid "Product Reviews Manager"
 msgstr ""
 
 #: includes/class-reviews.php:120
