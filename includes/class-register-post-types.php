@@ -183,7 +183,7 @@ class Register_Post_Types
                 'show_in_nav_menus'   => false,
                 'show_in_menu'        => true,
                 'capability_type'     => 'post',
-                'supports'            => ['title', 'editor', 'revisions', 'thumbnail'],
+                'supports'            => ['title', 'editor', 'revisions', 'thumbnail', 'custom-fields'],
             ],
         ];
     }
