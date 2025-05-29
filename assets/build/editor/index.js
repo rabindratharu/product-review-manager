@@ -42,17 +42,36 @@ class PrmSidebar extends _wordpress_element__WEBPACK_IMPORTED_MODULE_2__.Compone
     this.state = {};
   }
   render() {
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.Fragment, {
+    const {
+      meta,
+      setMetaFieldValue,
+      products
+    } = this.props;
+
+    // Prepare product options for SelectControl
+    const productOptions = [{
+      label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Select a Product', 'product-review-manager'),
+      value: ''
+    }, ...products.map(product => ({
+      label: product.title.rendered,
+      value: product.id
+    }))];
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.Fragment, {
       children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_edit_post__WEBPACK_IMPORTED_MODULE_0__.PluginSidebar, {
         name: "prm-sidebar",
         title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Product Review Manager', 'product-review-manager'),
         children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.PanelBody, {
-          title: "Review Details",
+          title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Review Details', 'product-review-manager'),
           children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.SelectControl, {
-            label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Rating', 'product-review-manager'),
-            value: this.props.meta.prm_rating || '',
+            label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Product Name', 'product-review-manager'),
+            value: meta.prm_product_name || '',
+            options: productOptions,
+            onChange: value => setMetaFieldValue(value, 'prm_product_name')
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.SelectControl, {
+            label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Rating (1-5)', 'product-review-manager'),
+            value: meta.prm_rating || '',
             options: [{
-              label: 'Select Rating',
+              label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Select Rating', 'product-review-manager'),
               value: ''
             }, {
               label: '1',
@@ -70,15 +89,11 @@ class PrmSidebar extends _wordpress_element__WEBPACK_IMPORTED_MODULE_2__.Compone
               label: '5',
               value: '5'
             }],
-            onChange: value => {
-              this.props.setMetaFieldValue(value, "prm_rating");
-            }
+            onChange: value => setMetaFieldValue(value, 'prm_rating')
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.TextControl, {
-            label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Reviewer\'s Name", "product-review-manager"),
-            value: this.props.meta.prm_reviewer_name || "",
-            onChange: value => {
-              this.props.setMetaFieldValue(value, "prm_reviewer_name");
-            }
+            label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Reviewer's Name", "product-review-manager"),
+            value: meta.prm_reviewer_name || '',
+            onChange: value => setMetaFieldValue(value, 'prm_reviewer_name')
           })]
         })
       })
@@ -86,14 +101,17 @@ class PrmSidebar extends _wordpress_element__WEBPACK_IMPORTED_MODULE_2__.Compone
   }
 }
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((0,_wordpress_compose__WEBPACK_IMPORTED_MODULE_5__.compose)((0,_wordpress_data__WEBPACK_IMPORTED_MODULE_4__.withSelect)(select => {
-  const postMeta = select("core/editor").getEditedPostAttribute("meta");
-  const oldPostMeta = select("core/editor").getCurrentPostAttribute("meta");
+  // Retrieve the current post's saved meta
+  const meta = select("core/editor").getCurrentPostAttribute("meta") || {};
+  // Fetch all WooCommerce products
+  const products = select('core').getEntityRecords('postType', 'product', {
+    per_page: -1,
+    // Retrieve all products
+    status: 'publish' // Only published products
+  }) || [];
   return {
-    meta: {
-      ...oldPostMeta,
-      ...postMeta
-    },
-    oldMeta: oldPostMeta
+    meta,
+    products
   };
 }), (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_4__.withDispatch)(dispatch => ({
   setMetaFieldValue: (value, field) => dispatch("core/editor").editPost({
