@@ -64,7 +64,8 @@ class PrmSidebar extends Component {
 export default compose(
     withSelect((select) => {
         // Retrieve the current post's saved meta
-        const meta = select("core/editor").getCurrentPostAttribute("meta") || {};
+        const postMeta = select("core/editor").getEditedPostAttribute("meta");
+        const oldPostMeta = select("core/editor").getCurrentPostAttribute("meta");
         // Fetch all WooCommerce products
         const products = select('core').getEntityRecords('postType', 'product', {
             per_page: -1, // Retrieve all products
@@ -72,7 +73,8 @@ export default compose(
         }) || [];
 
         return {
-            meta,
+            meta: { ...oldPostMeta, ...postMeta },
+            oldMeta: oldPostMeta,
             products,
         };
     }),

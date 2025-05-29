@@ -102,7 +102,8 @@ class PrmSidebar extends _wordpress_element__WEBPACK_IMPORTED_MODULE_2__.Compone
 }
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((0,_wordpress_compose__WEBPACK_IMPORTED_MODULE_5__.compose)((0,_wordpress_data__WEBPACK_IMPORTED_MODULE_4__.withSelect)(select => {
   // Retrieve the current post's saved meta
-  const meta = select("core/editor").getCurrentPostAttribute("meta") || {};
+  const postMeta = select("core/editor").getEditedPostAttribute("meta");
+  const oldPostMeta = select("core/editor").getCurrentPostAttribute("meta");
   // Fetch all WooCommerce products
   const products = select('core').getEntityRecords('postType', 'product', {
     per_page: -1,
@@ -110,7 +111,11 @@ class PrmSidebar extends _wordpress_element__WEBPACK_IMPORTED_MODULE_2__.Compone
     status: 'publish' // Only published products
   }) || [];
   return {
-    meta,
+    meta: {
+      ...oldPostMeta,
+      ...postMeta
+    },
+    oldMeta: oldPostMeta,
     products
   };
 }), (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_4__.withDispatch)(dispatch => ({
