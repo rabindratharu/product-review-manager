@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Plugin Utils
+ * Plugin Utils for Product Review Manager.
  *
  * @package product-review-manager
  * @since 1.0.0
@@ -14,7 +14,7 @@ use Product_Review_Manager\Utils\Singleton;
 /**
  * Helper class.
  *
- * Handles utility functions for the current theme/plugin.
+ * Handles utility functions for the Product Review Manager plugin.
  *
  * @since 1.0.0
  */
@@ -25,68 +25,75 @@ class Helper
     /**
      * Get an array of posts.
      *
-     * @static
-     * @access public
-     * @param array|string $args Define arguments for the WP_Query function.
-     * @return array Array of post IDs and titles.
+     * @since 1.0.0
+     * @param array|string $args Arguments for WP_Query.
+     * @return array Array of post IDs and titles, or empty array on failure.
      */
-    public static function get_posts($args)
+    public static function get_posts($args): array
     {
-        // Ensure $args is an array and set default suppress_filters
+        // Normalize $args to an array
         if (is_string($args)) {
             $args = wp_parse_args($args, ['suppress_filters' => false]);
-        } elseif (is_array($args)) {
-            $args = wp_parse_args($args, ['suppress_filters' => false]);
-        } else {
-            return []; // Return empty array for invalid input
+        } elseif (!is_array($args)) {
+            return [];
         }
 
-        // Use WP_Query instead of get_posts for better compatibility
+        // Set default query arguments
+        $args = wp_parse_args($args, [
+            'post_type'      => 'post',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'suppress_filters' => false,
+        ]);
+
         $query = new \WP_Query($args);
         $items = [];
 
         if ($query->have_posts()) {
             while ($query->have_posts()) {
                 $query->the_post();
-                $items[get_the_ID()] = get_the_title();
+                $items[get_the_ID()] = get_the_title() ?: __('(no title)', 'product-review-manager');
             }
         }
 
-        // Reset post data after WP_Query
         wp_reset_postdata();
-
         return $items;
     }
 
     /**
      * Get default options.
      *
-     * @static
-     * @access public
+     * @since 1.0.0
      * @return array Default options.
      */
-    public static function get_default_options()
+    public static function get_default_options(): array
     {
-        return apply_filters('prm_get_default_options', [
+        $defaults = [
             'setting1'  => esc_html__('Default Setting 1', 'product-review-manager'),
             'setting2'  => esc_html__('Default Setting 2', 'product-review-manager'),
             'setting3'  => false,
             'setting4'  => true,
             'setting5'  => 'option-1',
             'deleteAll' => false,
-        ]);
+        ];
+
+        return apply_filters(PRM_PLUGIN_NAME . '_get_default_options', $defaults);
     }
 
     /**
-     * Get the Plugin Saved Options.
+     * Get the plugin's saved options.
      *
      * @since 1.0.0
-     * @param string $key Optional option key.
-     * @return mixed All options array or option value.
+     * @param string $key Optional option key to retrieve a specific value.
+     * @return mixed Array of all options or specific option value.
      */
-    public static function get_options($key = '')
+    public static function get_options(string $key = '')
     {
-        $options = get_option(PRM_OPTION_NAME, []);
+        if (!defined('PRM_PLUGIN_NAME')) {
+            return $key ? false : [];
+        }
+
+        $options = get_option(PRM_PLUGIN_NAME, []);
         $default_options = self::get_default_options();
 
         if (!is_array($options)) {
@@ -94,46 +101,67 @@ class Helper
         }
 
         if (!empty($key)) {
-            return isset($options[$key]) ? $options[$key] : (isset($default_options[$key]) ? $default_options[$key] : false);
+            return $options[$key] ?? ($default_options[$key] ?? false);
         }
 
         return array_merge($default_options, $options);
     }
 
     /**
-     * Update the Plugin Options.
+     * Update the plugin options.
      *
      * @since 1.0.0
-     * @param string|array $key_or_data Array of options or single option key.
-     * @param mixed       $val Value of option key (if key is provided).
+     * @param string|array $key_or_data Option key or array of options.
+     * @param mixed       $val Value for the option key (if key is provided).
      * @return void
      */
-    public static function update_options($key_or_data, $val = '')
+    public static function update_options($key_or_data, $val = ''): void
     {
+        if (!defined('PRM_PLUGIN_NAME')) {
+            return;
+        }
+
         $options = self::get_options();
+        $schema = self::get_settings_schema()['properties'];
 
         if (is_string($key_or_data) && !empty($key_or_data)) {
+            // Sanitize based on schema type
+            if (isset($schema[$key_or_data]['type'])) {
+                $val = self::sanitize_option($val, $schema[$key_or_data]);
+            }
             $options[$key_or_data] = $val;
         } elseif (is_array($key_or_data)) {
+            foreach ($key_or_data as $key => $value) {
+                if (isset($schema[$key]['type'])) {
+                    $key_or_data[$key] = self::sanitize_option($value, $schema[$key]);
+                }
+            }
             $options = array_merge($options, $key_or_data);
         }
 
-        update_option(PRM_OPTION_NAME, $options);
+        update_option(PRM_PLUGIN_NAME, $options);
     }
 
     /**
      * Initialize and return the WordPress filesystem object.
      *
      * @since 1.0.0
-     * @return \WP_Filesystem_Base|WP_Error The WordPress filesystem object or WP_Error if initialization fails.
+     * @return \WP_Filesystem_Base|WP_Error Filesystem object or WP_Error on failure.
      */
     public static function file_system()
     {
         global $wp_filesystem;
 
-        if (! $wp_filesystem) {
+        if (!defined('ABSPATH')) {
+            return new \WP_Error('filesystem_error', __('ABSPATH is not defined.', 'product-review-manager'));
+        }
+
+        if (!$wp_filesystem) {
             require_once ABSPATH . 'wp-admin/includes/file.php';
-            if (! WP_Filesystem()) {
+            if (!WP_Filesystem()) {
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Product_Reviewer_Manager: Failed to initialize WP_Filesystem.');
+                }
                 return new \WP_Error('filesystem_error', __('Failed to initialize the WordPress filesystem.', 'product-review-manager'));
             }
         }
@@ -145,9 +173,9 @@ class Helper
      * Parse the changelog and return the changes.
      *
      * @since 1.0.0
-     * @return string The sanitized changelog content.
+     * @return string Sanitized changelog content.
      */
-    public static function parse_changelog()
+    public static function parse_changelog(): string
     {
         $wp_filesystem = self::file_system();
 
@@ -155,30 +183,114 @@ class Helper
             return '';
         }
 
-        $changelog_file = apply_filters('prm_changelog_file', PRM_PATH . 'readme.txt');
+        $changelog_file = apply_filters(PRM_PLUGIN_NAME . '_changelog_file', defined('PRM_PATH') ? PRM_PATH . 'readme.txt' : '');
 
-        if (!$wp_filesystem->exists($changelog_file) || !$wp_filesystem->is_readable($changelog_file)) {
+        if (empty($changelog_file) || !$wp_filesystem->exists($changelog_file) || !$wp_filesystem->is_readable($changelog_file)) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Product_Review_Manager: Changelog file not found or not readable at ' . $changelog_file);
+            }
             return '';
         }
 
         $content = $wp_filesystem->get_contents($changelog_file);
-
         if (empty($content)) {
             return '';
         }
 
         $matches = [];
-        $regexp = '~==\s*Changelog\s*==(.*)($)~Uis';
+        $regexp = '~==\s*Changelog\s*==\s*(.*?)(?==\s*[^\s]+\s*==|\z)~Uis';
         $changelog = '';
 
         if (preg_match($regexp, $content, $matches)) {
             $changes = explode("\r\n", trim($matches[1]));
             foreach ($changes as $line) {
-                $changelog .= preg_replace('~(=\s*Version\s*(\d+(?:\.\d+)+)\s*=|$)~Uis', '', $line) . "\n";
+                $line = preg_replace('~=\s*Version\s*(\d+(?:\.\d+)+)\s*=~i', '', $line);
+                $changelog .= trim($line) . "\n";
             }
         }
 
         return wp_kses_post(trim($changelog));
+    }
+
+    /**
+     * Get settings schema.
+     *
+     * @since 1.0.0
+     * @return array Settings schema conforming to JSON Schema (draft-04).
+     */
+    public static function get_settings_schema(): array
+    {
+        $defaults = self::get_default_options();
+        $setting_properties = apply_filters(
+            PRM_PLUGIN_NAME . '_options_properties',
+            [
+                'setting1' => [
+                    'type'        => 'string',
+                    'description' => __('First text setting.', 'product-review-manager'),
+                    'default'     => $defaults['setting1'],
+                ],
+                'setting2' => [
+                    'type'        => 'string',
+                    'description' => __('Second text setting.', 'product-review-manager'),
+                    'default'     => $defaults['setting2'],
+                ],
+                'setting3' => [
+                    'type'        => 'boolean',
+                    'description' => __('First boolean setting.', 'product-review-manager'),
+                    'default'     => $defaults['setting3'],
+                ],
+                'setting4' => [
+                    'type'        => 'boolean',
+                    'description' => __('Second boolean setting.', 'product-review-manager'),
+                    'default'     => $defaults['setting4'],
+                ],
+                'setting5' => [
+                    'type'        => 'string',
+                    'description' => __('Option selection setting.', 'product-review-manager'),
+                    'enum'        => ['option-1', 'option-2'],
+                    'default'     => $defaults['setting5'],
+                    'sanitize_callback' => 'sanitize_text_field',
+                ],
+                'deleteAll' => [
+                    'type'        => 'boolean',
+                    'description' => __('Delete all settings on plugin deactivation.', 'product-review-manager'),
+                    'default'     => $defaults['deleteAll'],
+                ],
+            ]
+        );
+
+        return [
+            '$schema'    => 'http://json-schema.org/draft-04/schema#',
+            'type'       => 'object',
+            'properties' => $setting_properties,
+        ];
+    }
+
+    /**
+     * Sanitize an option value based on its schema.
+     *
+     * @since 1.0.0
+     * @param mixed $value Value to sanitize.
+     * @param array $schema Schema for the option.
+     * @return mixed Sanitized value.
+     */
+    private static function sanitize_option($value, array $schema)
+    {
+        switch ($schema['type']) {
+            case 'string':
+                $sanitize_callback = $schema['sanitize_callback'] ?? 'sanitize_text_field';
+                $value = call_user_func($sanitize_callback, $value);
+                if (isset($schema['enum']) && !in_array($value, $schema['enum'], true)) {
+                    $value = $schema['default'] ?? '';
+                }
+                break;
+            case 'boolean':
+                $value = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? $schema['default'] ?? false;
+                break;
+            default:
+                $value = $schema['default'] ?? $value;
+        }
+        return $value;
     }
 
     /**
@@ -202,11 +314,11 @@ class Helper
                     'page_title' => esc_html__('Product Review Manager Page', 'product-review-manager'),
                     'menu_title' => esc_html__('Product Review Manager Settings', 'product-review-manager'),
                     'menu_slug'  => PRM_PLUGIN_NAME,
-                    'icon_url'   => PRM_BUILD_PATH_URL . '/images/logo-20-20.png',
+                    'icon_url'   => PRM_BUILD_PATH_URL . '/images/placeholder.png',
                     'position'   => null,
                 ],
                 'dashboard' => [
-                    'logo'   => PRM_BUILD_PATH_URL . '/images/logo.png',
+                    'logo'   => PRM_BUILD_PATH_URL . '/images/placeholder.png',
                     'notice' => sprintf(
                         /* translators: %s is the plugin name */
                         esc_html__('Congratulations on choosing the %s for creating your plugin. We recommend taking a few minutes to read the following information on how the plugin works. Please read it carefully to fully understand the capabilities of the plugin and how to use them effectively.', 'product-review-manager'),
@@ -230,37 +342,37 @@ class Helper
                             [
                                 'icon'    => '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="at-svg" viewBox="0 0 16 16"><path d="M11.251.068a.5.5 0 0 1 .227.58L9.677 6.5H13a.5.5 0 0 1 .364.843l-8 8.5a.5.5 0 0 1-.842-.49L6.323 9.5H3a.5.5 0 0 1-.364-.843l8-8.5a.5.5 0 0 1 .615-.09z"/></svg>',
                                 'text'    => esc_html__('Get started', 'product-review-manager'),
-                                'url'     => 'https://github.com/codersantosh/wp-react-plugin-boilerplate',
+                                'url'     => 'https://github.com/rabindratharu/product-review-manager',
                                 'variant' => 'primary',
                             ],
                             [
                                 'icon'    => '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="at-svg" viewBox="0 0 16 16"><path d="M13 0H6a2 2 0 0 0-2 2 2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2 2 2 0 0 0 2-2V2a2 2 0 0 0-2-2m0 13V4a2 2 0 0 0-2-2H5a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1M3 4a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></svg>',
                                 'text'    => esc_html__('Documentation', 'product-review-manager'),
-                                'url'     => 'https://github.com/codersantosh/wp-react-plugin-boilerplate',
+                                'url'     => 'https://github.com/rabindratharu/product-review-manager',
                                 'variant' => 'outline-primary',
                             ],
                             [
                                 'icon'    => '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="at-svg" viewBox="0 0 16 16"><path d="M3.1.7a.5.5 0 0 1 .4-.2h9a.5.5 0 0 1 .4.2l2.976 3.974c.149.185.156.45.01.644L8.4 15.3a.5.5 0 0 1-.8 0L.1 5.3a.5.5 0 0 1 0-.6zm11.386 3.785-1.806-2.41-.776 2.413zm-3.633.004.961-2.989H4.186l.963 2.995zM5.47 5.495 8 13.366l2.532-7.876zm-1.371-.999-.78-2.422-1.818 2.425zM1.499 5.5l5.113 6.817-2.192-6.82zm7.889 6.817 ferta
         5.123-6.83-2.928.002z"/></svg>',
                                 'text'    => esc_html__('Get support', 'product-review-manager'),
-                                'url'     => 'https://github.com/codersantosh/wp-react-plugin-boilerplate',
+                                'url'     => 'https://github.com/rabindratharu/product-review-manager',
                                 'variant' => 'secondary',
                             ],
                         ],
-                        'image' => PRM_BUILD_PATH_URL . '/images/featured-image.png',
+                        'image' => PRM_BUILD_PATH_URL . '/images/placeholder.png',
                     ],
                     'identity' => [
-                        'logo'    => PRM_BUILD_PATH_URL . '/images/logo.png',
+                        'logo'    => PRM_BUILD_PATH_URL . '/images/placeholder.png',
                         'title'   => $plugin_name,
                         'buttons' => [
                             [
                                 'text'    => esc_html__('Visit site', 'product-review-manager'),
-                                'url'     => 'https://github.com/codersantosh/wp-react-plugin-boilerplate',
+                                'url'     => 'https://github.com/rabindratharu/product-review-manager',
                                 'variant' => 'primary',
                             ],
                             [
                                 'text'    => esc_html__('Get Support', 'product-review-manager'),
-                                'url'     => 'https://github.com/codersantosh/wp-react-plugin-boilerplate',
+                                'url'     => 'https://github.com/rabindratharu/product-review-manager',
                                 'variant' => 'light',
                             ],
                         ],
@@ -272,14 +384,14 @@ class Helper
                                 'icon'    => '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="at-svg" viewBox="0 0 16 16"><path d="M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4.414A2 2 0 0 0 3 11.586l-2 2V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12.793a.5.5 0 0 0 .854.353l2.853-2.853A1 1 0 0 1 4.414 12H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/><path d="M3 3.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5M3 6a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 6m0 2.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5"/></svg>',
                                 'title'   => esc_html__('Support', 'product-review-manager'),
                                 'text'    => esc_html__('Get Support', 'product-review-manager'),
-                                'url'     => 'https://github.com/codersantosh/wp-react-plugin-boilerplate',
+                                'url'     => 'https://github.com/rabindratharu/product-review-manager',
                                 'variant' => 'link',
                             ],
                             [
                                 'icon'    => '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="at-svg" viewBox="0 0 16 16"><path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1zm13 2.383-4.708 2.825L15 11.105zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741M1 11.105l4.708-2.897L1 5.383z"/></svg>',
                                 'title'   => esc_html__('Email', 'product-review-manager'),
-                                'text'    => esc_html__('codersantosh@gmail.com', 'product-review-manager'),
-                                'url'     => 'mailto:codersantosh@icloud.com',
+                                'text'    => esc_html__('rabindra.tharu.np@gmail.com', 'product-review-manager'),
+                                'url'     => 'mailto:rabindra.tharu.np@gmail.com',
                                 'variant' => 'link',
                             ],
                             [
@@ -291,17 +403,17 @@ class Helper
                         'social' => [
                             [
                                 'icon'    => '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="at-svg" viewBox="0 0 16 16"><path d="M12.633 7.653c0-.848-.305-1.435-.566-1.892l-.08-.13c-.317-.51-.594-.958-.594-1.48 0-.63.478-1.218 1.152-1.218q.03 0 .058.003l.031.003A6.84 6.84 0 0 0 8 1.137 6.86 6.86 0 0 0 2.266 4.23c.16.005.313.009.442.009.717 0 1.828-.087 1.828-.087.37-.022.414.521.044.565 0 0-.371.044-.785.065l2.5 7.434 1.5-4.506-1.07-2.929c-.369-.022-.719-.065-.719-.065-.37-.022-.326-.588.043-.566 0 0 1.134.087 1.808.087.718 0 1.83-.087 1.83-.087.37-.022.413.522.043.566 0 0-.372.043-.785.065l2.48 7.377.684-2.287.054-.173c.27-.86.469-1.495.469-2.046zM1.137 8a6.86 6.86 0 0 0 3.868 6.176L1.73 5.206A6.8 6.8 0 0 0 1.137 8"/><path d="M6.061 14.583 8.121 8.6l2.109 5.78q.02.05.049.094a6.85 6.85 0 0 1-4.218.109m7.96-9.876q.046.328.047.706c0 .696-.13 1.479-.522 2.458l-2.096 6.06a6.86 6.86 0 0 0 2.572-9.224z"/><path fill-rule="evenodd" d="M0 8c0-4.411 3.589-8 8-8s8 3.589 8 8-3.59 8-8 8-8-3.589-8-8m.367 8c0 4.209 3.424 7.633 7.633 7.633S15.632 12.209 15.632 8C15.632 3.79 12.208.367 8 .367 3.79.367.367 3.79.367 8"/></svg>',
-                                'url'     => 'https://profiles.wordpress.org/codersantosh/',
+                                'url'     => 'https://github.com/rabindratharu/',
                                 'variant' => 'outline-primary',
                             ],
                             [
                                 'icon'    => '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="at-svg" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07o-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/></svg>',
-                                'url'     => 'https://github.com/codersantosh',
+                                'url'     => 'https://github.com/rabindratharu',
                                 'variant' => 'outline-primary',
                             ],
                             [
                                 'icon'    => '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="at-svg" viewBox="0 0 16 16"><path d="M5.026 15c6.038 0 9.341-5.003 9.341-9.334q.002-.211-.006-.422A6.7 6.7 0 0 0 16 3.542a6.7 6.7 0 0 1-1.889.518 3.3 3.3 0 0 0 1.447-1.817 6.5 6.5 0 0 1-2.087.793A3.286 3.286 0 0 0 7.875 6.03a9.32 9.32 0 0 1-6.767-3.429 3.29 3.29 0 0 0 1.018 4.382A3.3 3.3 0 0 1 .64 6.575v.045a3.29 3.29 0 0 0 2.632 3.218 3.2 3.2 0 0 1-.865.115 3 3 0 0 1-.614-.057 3.28 3.28 0 0 0 3.067 2.277A6.6 6.6 0 0 1 .78 13.58a6 6 0 0 1-.78-.045A9.34 9.34 0 0 0 5.026 15"/></svg>',
-                                'url'     => 'https://twitter.com/codersantosh',
+                                'url'     => 'https://www.linkedin.com/in/rabindratharu/',
                                 'variant' => 'outline-primary',
                             ],
                         ],
@@ -326,7 +438,7 @@ class Helper
                             'title'      => esc_html__('Knowledge base', 'product-review-manager'),
                             'content'    => esc_html__('The utilization of this plugin can be facilitated by perusing comprehensive and well-documented articles.', 'product-review-manager'),
                             'buttonText' => esc_html__('Visit knowledge base', 'product-review-manager'),
-                            'buttonLink' => 'https://github.com/codersantosh/wp-react-plugin-boilerplate',
+                            'buttonLink' => 'https://github.com/rabindratharu/product-review-manager',
                         ],
                         [
                             'icon'       => '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="at-svg" viewBox="0 0 16 16"><path d="M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4.414A2 2 0 0 0 3 11.586l-2 2V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12.793a.5.5 0 0 0 .854.353l2.853-2.853A1 1 0 0 1 4.414 12H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/><path d="M3 3.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5M3 6a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 6m0 2.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5"/></svg>',
@@ -337,7 +449,7 @@ class Helper
                                 $plugin_name
                             ),
                             'buttonText' => esc_html__('Visit community page', 'product-review-manager'),
-                            'buttonLink' => 'https://github.com/codersantosh/wp-react-plugin-boilerplate',
+                            'buttonLink' => 'https://github.com/rabindratharu/product-review-manager',
                         ],
                         [
                             'icon'       => '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="at-svg" viewBox="0 0 16 16"><path d="M2.678 11.894a1 1 0 0 1 .287.801 11 11 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8 8 0 0 0 8 14c3.996 0 7-2.807 7-6s-3.004-6-7-6-7 2.808-7 6c0 1.468.617 2.83 1.678 3.894m-.493 3.905a22 22 0 0 1-.713.129c-.2.032-.352-.176-.273-.362a10 10 0 0 0 .244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9 9 0 0 1-2.347-.306c-.52.263-1.639.742-3.468 1.105"/></svg>',
@@ -348,7 +460,7 @@ class Helper
                                 $plugin_name
                             ),
                             'buttonText' => esc_html__('Create a support thread', 'product-review-manager'),
-                            'buttonLink' => 'https://github.com/codersantosh/wp-react-plugin-boilerplate',
+                            'buttonLink' => 'https://github.com/rabindratharu/product-review-manager',
                         ],
                         [
                             'icon'       => '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="at-svg" viewBox="0 0 16 16"><path d="M0 12V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2m6.79-6.907A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814z"/></svg>',
@@ -359,7 +471,7 @@ class Helper
                                 $plugin_name
                             ),
                             'buttonText' => esc_html__('View video guide', 'product-review-manager'),
-                            'buttonLink' => 'https://github.com/codersantosh/wp-react-plugin-boilerplate',
+                            'buttonLink' => 'https://github.com/rabindratharu/product-review-manager',
                         ],
                     ],
                     'topicLinks' => [
@@ -399,53 +511,5 @@ class Helper
         );
 
         return !empty($key) ? (isset($options[$key]) ? $options[$key] : []) : $options;
-    }
-
-    /**
-     * Get settings schema
-     * Schema: http://json-schema.org/draft-04/schema#
-     *
-     * Add your own settings fields here
-     *
-     * @access public
-     *
-     * @since 1.0.0
-     *
-     * @return array settings schema for this plugin.
-     */
-    public static function get_settings_schema()
-    {
-        $setting_properties = apply_filters(
-            'prm_options_properties',
-            array(
-                /*Settings -> Settings1*/
-                'setting1'  => array(
-                    'type' => 'string',
-                ),
-                'setting2'  => array(
-                    'type' => 'string',
-                ),
-                /*Settings -> Settings2*/
-                'setting3'  => array(
-                    'type' => 'boolean',
-                ),
-                'setting4'  => array(
-                    'type' => 'boolean',
-                ),
-                'setting5'  => array(
-                    'type'              => 'string',
-                    'sanitize_callback' => 'sanitize_key',
-                ),
-                /*Settings -> Advanced*/
-                'deleteAll' => array(
-                    'type' => 'boolean',
-                ),
-            ),
-        );
-
-        return array(
-            'type'       => 'object',
-            'properties' => $setting_properties,
-        );
     }
 }
