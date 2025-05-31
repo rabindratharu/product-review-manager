@@ -38,7 +38,7 @@ const MainContent = () => {
                 <AtrcControlToggle
                     label={__(
                         'Check to enable',
-                        'wp-react-plugin-boilerplate'
+                        'product-review-manager'
                     )}
                     checked={setting3}
                     onChange={() => dbUpdateSetting('setting3', !setting3)}
@@ -49,7 +49,7 @@ const MainContent = () => {
                 <AtrcControlToggle
                     label={__(
                         'Check to enable',
-                        'wp-react-plugin-boilerplate'
+                        'product-review-manager'
                     )}
                     checked={setting4}
                     onChange={() => dbUpdateSetting('setting4', !setting4)}
@@ -58,15 +58,15 @@ const MainContent = () => {
             </AtrcPanelRow>
             <AtrcPanelRow>
                 <AtrcControlSelect
-                    label={__('Setting 5 Select', 'wp-react-plugin-boilerplate')}
+                    label={__('Setting 5 Select', 'product-review-manager')}
                     value={setting5}
                     options={[
                         {
-                            label: __('Option 1', 'wp-react-plugin-boilerplate'),
+                            label: __('Option 1', 'product-review-manager'),
                             value: 'option-1'
                         },
                         {
-                            label: __('Option 2', 'wp-react-plugin-boilerplate'),
+                            label: __('Option 2', 'product-review-manager'),
                             value: 'option-2'
                         },
                     ]}
@@ -105,7 +105,7 @@ const Documentation = () => {
                         className={classNames(AtrcPrefix('m-0'))}
                         title={__(
                             'FAQ Query 3?',
-                            'wp-react-plugin-boilerplate'
+                            'product-review-manager'
                         )}
                         initialOpen={true}>
                         <AtrcText
@@ -113,19 +113,19 @@ const Documentation = () => {
                             className={classNames(AtrcPrefix('m-0'), 'at-m')}>
                             {__(
                                 'FAQ Answer 3',
-                                'wp-react-plugin-boilerplate'
+                                'product-review-manager'
                             )}
                         </AtrcText>
                     </AtrcPanelBody>
                     <AtrcPanelBody
-                        title={__('FAQ Query 4?', 'wp-react-plugin-boilerplate')}
+                        title={__('FAQ Query 4?', 'product-review-manager')}
                         initialOpen={false}>
                         <AtrcText
                             tag='p'
                             className={classNames(AtrcPrefix('m-0'), 'at-m')}>
                             {__(
                                 'FAQ Answer 4',
-                                'wp-react-plugin-boilerplate'
+                                'product-review-manager'
                             )}
                         </AtrcText>
                     </AtrcPanelBody>
@@ -151,7 +151,7 @@ const Settings = () => {
                 className: classNames(AtrcPrefix('bg-white'), 'at-bg-cl'),
             }}
             renderHeader={
-                <AtrcTitleTemplate1 title={__('Settings', 'wp-react-plugin-boilerplate')} />
+                <AtrcTitleTemplate1 title={__('Settings', 'product-review-manager')} />
             }
             renderContent={
                 <AtrcWireFrameContentSidebar

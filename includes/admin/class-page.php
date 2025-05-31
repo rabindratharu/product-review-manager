@@ -194,7 +194,7 @@ class Page
                 'white_label' => Helper::white_label(),
             ]
         );
-        wp_localize_script('prm-admin', 'WpReactPluginBoilerplateLocalize', $localize);
+        wp_localize_script('prm-admin', 'PrmLocalize', $localize);
     }
 
     /**
