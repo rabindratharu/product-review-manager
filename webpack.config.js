@@ -52,6 +52,11 @@ module.exports = {
                         to: BUILD_DIR + '/images',
                         noErrorOnMissing: true,
                     },
+                    {
+                        from: SRC_DIR + '/library',
+                        to: BUILD_DIR + '/library',
+                        noErrorOnMissing: true,
+                    },
                 ]
             })
         ]

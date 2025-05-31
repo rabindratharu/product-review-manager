@@ -20,6 +20,8 @@ use Product_Review_Manager\Reviews;
 use Product_Review_Manager\Utils\Helper;
 use Product_Review_Manager\Utils\Singleton;
 use Product_Review_Manager\Api\Rest_Endpoint;
+use Product_Review_Manager\Api\Api_Settings;
+use Product_Review_Manager\Admin\Page;
 
 /**
  * Plugin Main Class
@@ -122,5 +124,9 @@ final class Plugin
 
         // REST API
         Rest_Endpoint::get_instance();
+        Api_Settings::get_instance();
+
+        // Admin
+        Page::get_instance();
     }
 }

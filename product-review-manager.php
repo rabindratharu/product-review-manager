@@ -27,6 +27,8 @@ define('PRM_URL', plugin_dir_url(__FILE__));
 define('PRM_BASENAME', plugin_basename(__FILE__));
 define('PRM_BUILD_PATH', PRM_PATH . 'assets/build');
 define('PRM_BUILD_PATH_URL', PRM_URL . 'assets/build');
+define('PRM_PLUGIN_NAME', 'product-review-manager');
+define('PRM_OPTION_NAME', 'product-review-manager');
 
 /**
  * Bootstrap the plugin.
