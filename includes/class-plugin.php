@@ -50,6 +50,43 @@ final class Plugin
     }
 
     /**
+     * Method to execute tasks on plugin activation.
+     *
+     * This function is triggered when the plugin is activated.
+     * It can be used to set up default options, create necessary database tables,
+     * or perform any other initial setup required by the plugin.
+     *
+     * @since 1.0.0
+     * @return void
+     */
+
+    public function activate()
+    {
+        $current_version = get_option('prm_plugin_version', '0.0.0');
+        $new_version = self::VERSION; // Replace with your plugin version
+
+        if (version_compare($current_version, $new_version, '<')) {
+            // Flush rewrite rules on update
+            flush_rewrite_rules();
+            update_option('prm_plugin_version', $new_version);
+        }
+    }
+
+    /**
+     * Method to execute tasks on plugin deactivation.
+     *
+     * This function is triggered when the plugin is deactivated.
+     * It can be used to clean up any resources or data associated with the plugin.
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    public function deactivate()
+    {
+        flush_rewrite_rules();
+    }
+
+    /**
      * Prevent cloning of the plugin instance
      *
      * @since 1.0.0
@@ -99,7 +136,7 @@ final class Plugin
         load_plugin_textdomain(
             'product-review-manager',
             false,
-            dirname(PRM_BASENAME) . '/languages/',
+            dirname(PRM_BASENAME) . '/languages'
         );
     }
 
