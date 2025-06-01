@@ -27,8 +27,9 @@ class Rest_Endpoint
 {
     use Singleton;
 
-    private const NAMESPACE = 'prm/v1';
-    private const SEARCH_ENDPOINT = '/reviews';
+    private const VERSION = 'v1';
+    private const NAMESPACE = 'prm';
+    private const ENDPOINT = 'reviews';
     private const DEFAULT_POSTS_PER_PAGE = 9;
     private const DEFAULT_PAGE = 1;
     private const POST_TYPE = 'product_review';
@@ -53,8 +54,8 @@ class Rest_Endpoint
     public function register_routes(): void
     {
         register_rest_route(
-            self::NAMESPACE,
-            self::SEARCH_ENDPOINT,
+            self::NAMESPACE . '/' . self::VERSION,
+            '/' . self::ENDPOINT,
             [
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => [$this, 'get_items'],
